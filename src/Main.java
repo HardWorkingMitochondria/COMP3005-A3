@@ -7,10 +7,8 @@ import java.sql.SQLException;
 public class Main {
     public static Connection conn;
     public static void getAllStudents(){
-        //set query
         String selectAllSQL = " SELECT * FROM students" ;
         try (PreparedStatement pstmt = conn.prepareStatement(selectAllSQL)) {
-            //get results from db
             java.sql.ResultSet result = pstmt.executeQuery();
             System.out.println("ID|FIRSTNAME|LASTNAME|EMAIL|ENROLLDATE\n");
             while(result.next()){
@@ -26,11 +24,13 @@ public class Main {
             e.printStackTrace();
         }
     }
+    /*
+    * DOCUMENTATION NOTE
+    * Using prepared statement, question marks are replaced with pstmt set functions with parameterIndex
+    * */
     public static void addStudent(String first_name, String last_name, String email,String date){
-        //set query
         String insert = String.format(" INSERT INTO students (first_name, last_name, email, enrollment_date) VALUES(?,?,?,?)");
         try (PreparedStatement pstmt = conn.prepareStatement(insert)) {
-            //set ? values in string Prep Statement
             pstmt.setString(1,first_name);
             pstmt.setString(2,last_name);
             pstmt.setString(3,email);
@@ -47,11 +47,13 @@ public class Main {
         }
     }
 
+    /**
+     *Update a student by their ID with new email
+     */
     public static void updateStudentEmail(int student_id, String new_email){
         //set query
         String update = String.format(" UPDATE students SET email = ? WHERE student_id = ?" );
         try (PreparedStatement pstmt = conn.prepareStatement(update)) {
-            //set ? values in string Prep Statement
             pstmt.setString(1,new_email);
             pstmt.setInt(2,student_id);
             int rows = pstmt.executeUpdate();
@@ -66,12 +68,11 @@ public class Main {
         }
     }
 
+    //Delete specified student by ID
     public static void deleteStudent(int student_id){
-        //set query
         String delete = String.format("DELETE FROM students WHERE student_id = ?");
         try (PreparedStatement pstmt = conn.prepareStatement(delete)) {
             pstmt.setInt(1,student_id);
-
             int rows = pstmt.executeUpdate();
             if(rows > 0){
                 System.out.println("STUDENT DELETED");
@@ -86,7 +87,7 @@ public class Main {
 
 
     public static void main(String[] args) {
-        // JDBC & Database credentials
+        // JDBC & Database credentials: EDIT CREDENTIALS HERE
         String url = "jdbc:postgresql://localhost:5432/postgres";
         String user = "postgres";
         String password = "postgres";
@@ -97,6 +98,7 @@ public class Main {
             // Connect to the database
             conn = DriverManager.getConnection(url, user, password);
             if (conn != null) {
+                //Main program flow
                 System.out.println("Connected to PostgreSQL successfully!");
                 while(choice != 0){
                     //Show Control Flow
@@ -107,6 +109,7 @@ public class Main {
                             "(4) Delete Student\n" +
                             "(0) Quit\n");
 
+                    //NOTE: No error handling was done for types
                     System.out.println("Enter Choice: ");
                     choice = input.nextInt();
 
@@ -114,7 +117,7 @@ public class Main {
                         getAllStudents();
                     }
                     else if (choice == 2){
-                        //Get user input for new student
+
                         System.out.println("FIRST NAME: ");
                         String first_name = input.next();
                         System.out.println("LAST NAME: ");
@@ -123,19 +126,23 @@ public class Main {
                         String email = input.next();
                         System.out.println("DATE (YYYY-MM-DD): ");
                         String date = input.next();
+
                         addStudent(first_name,last_name,email,date);
 
                     }
                     else if (choice == 3){
+
                         System.out.println("ID: ");
                         int id = input.nextInt();
                         System.out.println("NEW EMAIL: ");
                         String email = input.next();
+
                         updateStudentEmail(id,email);
                     }
                     else if (choice == 4){
                         System.out.println("ID: ");
                         int id = input.nextInt();
+
                         deleteStudent(id);
                     }
                     else if (choice == 0){
@@ -147,13 +154,12 @@ public class Main {
 
                 }
 
-                //Close scanner end program
                 input.close();
 
 
             } else {
                 System.out.println("Failed to establish connection.");
-            } // Close the connection (in a real scenario, do this in a finally
+            } // Close the connection (in a real scenario, do this in a finally)
             conn.close();
 
 
@@ -161,7 +167,5 @@ public class Main {
         catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
         }
-
-
     }
 }
