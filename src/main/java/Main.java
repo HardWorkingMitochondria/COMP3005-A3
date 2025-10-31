@@ -205,7 +205,7 @@ public class Main {
                         updateStudentEmail(id,email);
                     }
                     else if (choice == 4){
-                        int id = input.nextInt();
+                        int id = valid_integer();
                         deleteStudent(id);
                     }
                     else if (choice == 0){
@@ -224,7 +224,6 @@ public class Main {
                 System.out.println("Failed to establish connection.");
             } // Close the connection (in a real scenario, do this in a finally)
             conn.close();
-
 
         }
         catch (ClassNotFoundException | SQLException e) {
