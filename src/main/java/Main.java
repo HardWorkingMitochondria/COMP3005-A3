@@ -3,6 +3,8 @@ import java.util.Scanner;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Main {
     //Global Connection for all db operations
@@ -18,17 +20,16 @@ public class Main {
                 String last_name = result.getString("last_name");
                 String email = result.getString("email");
                 java.sql.Date date = result.getDate("enrollment_date");
-
-                System.out.printf("%d|%s|%s|%s|%s\n", id,first_name,last_name,email, date);
+                System.out.printf("%d|%s|%s|%s|%s\n", id,first_name,last_name,email, date);//format output
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
     /*
-    * DOCUMENTATION NOTE
-    * Using prepared statement, question marks are replaced with pstmt set functions with parameterIndex
-    * */
+     * DOCUMENTATION NOTE
+     * Using prepared statement, question marks are replaced with pstmt set functions with parameterIndex
+     * */
     public static void addStudent(String first_name, String last_name, String email,String date){
         //Prepare query
         String insert = String.format(" INSERT INTO students (first_name, last_name, email, enrollment_date) VALUES(?,?,?,?)");
@@ -54,7 +55,7 @@ public class Main {
         }
     }
 
-    /**
+    /*
      *Update a student by their ID with new email
      */
     public static void updateStudentEmail(int student_id, String new_email){
@@ -96,11 +97,73 @@ public class Main {
             e.printStackTrace();
         }
     }
+    /*
+    * For additional format/error handling in Java, the following resources were used for Pattern and Matcher and REGEX usage
+    * https://www.w3schools.com/java/java_regex.asp
+    * https://docs.oracle.com/javase/8/docs/api/java/util/regex/Matcher.html
+    * */
+    public static String valid_email(){
+        Scanner input = new Scanner(System.in);
+        //Define REGEX pattern
+        Pattern pattern = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
+        String email;
+
+        while(true){//loop for valid email pattern
+            System.out.println("EMAIL: ");
+            email = input.next();
+
+            //Check for email pattern
+            Matcher matcher = pattern.matcher(email);
+            if(matcher.matches()){
+                return email;
+            }
+            else {
+                System.out.println("INVALID FORMAT. TRY AGAIN");
+            }
+        }
+    }
+    /*
+     * Return valid user date
+     * NOTE: DOES NOT check for logical date, only checks format of date
+     */
+    public static String valid_date(){
+        Scanner input = new Scanner(System.in);
+
+        //Define date pattern
+        Pattern pattern = Pattern.compile("^\\d{4}-\\d{2}-\\d{2}$");
+        String date;
+
+        while(true){//loop until valid date format is entered
+            System.out.println("DATE (YYYY-MM-DD): ");
+            date = input.next();
+            Matcher matcher = pattern.matcher(date);
+            if(matcher.matches()){
+                return date;
+            }
+            else {
+                System.out.println("INVALID FORMAT. TRY AGAIN");
+            }
+        }
+    }
+    public static int valid_integer(){
+        Scanner input = new Scanner(System.in);
+        while(true){
+            System.out.println("Enter Number: ");
+            if(input.hasNextInt()){
+                int choice = input.nextInt();
+                return choice;
+            }
+            else{
+                System.out.println("INVALID TYPE. TRY AGAIN");
+                input.next();
+            }
+        }
+    }
 
 
     public static void main(String[] args) {
         // JDBC & Database credentials: EDIT CREDENTIALS HERE
-        String url = "jdbc:postgresql://localhost:5432/postgres";
+        String url = "jdbc:postgresql://localhost:5432/students";
         String user = "postgres";
         String password = "postgres";
         //Set default choice and set up input
@@ -123,41 +186,26 @@ public class Main {
                             "(3) Update Student\n" +
                             "(4) Delete Student\n" +
                             "(0) Quit\n");
-
-                    //NOTE: No error handling was done for types
-                    System.out.println("Enter Choice: ");
-                    choice = input.nextInt();
-
+                    choice = valid_integer();
                     if (choice == 1){
                         getAllStudents();
                     }
                     else if (choice == 2){
-
                         System.out.println("FIRST NAME: ");
                         String first_name = input.next();
                         System.out.println("LAST NAME: ");
                         String last_name = input.next();
-                        System.out.println("EMAIL: ");
-                        String email = input.next();
-                        System.out.println("DATE (YYYY-MM-DD): ");
-                        String date = input.next();
-
+                        String email = valid_email();
+                        String date = valid_date();
                         addStudent(first_name,last_name,email,date);
-
                     }
                     else if (choice == 3){
-
-                        System.out.println("ID: ");
-                        int id = input.nextInt();
-                        System.out.println("NEW EMAIL: ");
-                        String email = input.next();
-
+                        int id = valid_integer();
+                        String email = valid_email();
                         updateStudentEmail(id,email);
                     }
                     else if (choice == 4){
-                        System.out.println("ID: ");
                         int id = input.nextInt();
-
                         deleteStudent(id);
                     }
                     else if (choice == 0){
