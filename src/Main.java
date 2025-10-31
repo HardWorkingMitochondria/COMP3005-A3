@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class Main {
+    //Global Connection for all db operations
     public static Connection conn;
     public static void getAllStudents(){
         String selectAllSQL = " SELECT * FROM students" ;
@@ -29,13 +30,19 @@ public class Main {
     * Using prepared statement, question marks are replaced with pstmt set functions with parameterIndex
     * */
     public static void addStudent(String first_name, String last_name, String email,String date){
+        //Prepare query
         String insert = String.format(" INSERT INTO students (first_name, last_name, email, enrollment_date) VALUES(?,?,?,?)");
         try (PreparedStatement pstmt = conn.prepareStatement(insert)) {
+            //Set vales for insertion
             pstmt.setString(1,first_name);
             pstmt.setString(2,last_name);
             pstmt.setString(3,email);
             pstmt.setDate(4, java.sql.Date.valueOf(date));
+
+            //log rows changed
             int rows = pstmt.executeUpdate();
+
+            //if 1 row is modified the query ran successfully
             if(rows > 0){
                 System.out.println("STUDENT ADDED");
             }
@@ -51,10 +58,13 @@ public class Main {
      *Update a student by their ID with new email
      */
     public static void updateStudentEmail(int student_id, String new_email){
-        //set query
+        //Prepare update
         String update = String.format(" UPDATE students SET email = ? WHERE student_id = ?" );
         try (PreparedStatement pstmt = conn.prepareStatement(update)) {
+            //Set email
             pstmt.setString(1,new_email);
+
+            //Set student to change
             pstmt.setInt(2,student_id);
             int rows = pstmt.executeUpdate();
             if(rows > 0){
@@ -70,8 +80,10 @@ public class Main {
 
     //Delete specified student by ID
     public static void deleteStudent(int student_id){
+        //Prepare delete
         String delete = String.format("DELETE FROM students WHERE student_id = ?");
         try (PreparedStatement pstmt = conn.prepareStatement(delete)) {
+            //Set student to delete
             pstmt.setInt(1,student_id);
             int rows = pstmt.executeUpdate();
             if(rows > 0){
@@ -91,14 +103,17 @@ public class Main {
         String url = "jdbc:postgresql://localhost:5432/postgres";
         String user = "postgres";
         String password = "postgres";
+        //Set default choice and set up input
         int choice = -1;
         Scanner input = new Scanner(System.in);
+
+        //Lecture 12 code
         try { // Load PostgreSQL JDBC Driver
             Class.forName("org.postgresql.Driver");
             // Connect to the database
             conn = DriverManager.getConnection(url, user, password);
             if (conn != null) {
-                //Main program flow
+                //Main program loop
                 System.out.println("Connected to PostgreSQL successfully!");
                 while(choice != 0){
                     //Show Control Flow
